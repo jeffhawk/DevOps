@@ -139,7 +139,7 @@ jobs:
 
             - name: Exportar outputs para JSON
               working-directory: infra/terraform
-              run: terraform output -json > tf_outputs.json
+              run: terraform output -json > tf_outputs.json 2>/dev/null
 
             - name: Verificar outputs do Terraform.
               working-directory: infra/terraform
