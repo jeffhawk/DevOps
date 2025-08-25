@@ -1,0 +1,13 @@
+label {
+    /* display: inline-flex; */
+    margin-right: 15px;
+  }
+  
+h2{
+    text-align: center;
+  }
+
+Link a:hover{
+  text-decoration-color: white;
+  color: white;
+}
