@@ -23,7 +23,10 @@ jobs:
               run: npm ci
 
             - name: Run tests
-              run: npm test
+              run: npm test -- --watchAll=false
+
+            - name: Audit packages
+              run: npm audit --production --audit-level=moderate || true
 
             - name: Build
               run: npm run build
@@ -33,8 +36,8 @@ jobs:
 
             - name: Verificar se existe index.html
               run: |
-                pwd
-                ls -l
+                # pwd
+                # ls -l
                 if [ ! -f build/index.html ]; then
                     echo "index.html não encontrado"
                     exit 1
@@ -46,4 +49,4 @@ jobs:
               uses: actions/upload-artifact@v4
               with:
                     name: build
-                    path: build
+                    path: build/
