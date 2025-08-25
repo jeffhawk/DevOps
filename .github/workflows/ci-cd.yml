@@ -88,7 +88,7 @@ jobs:
                 name: tfplan
                 path: infra/terraform/plan.tfplan
 
-    #3 - Irá aplicar a estrutura somente se houve um push para o branch principal que no meu caso e o master
+    #3 - Irá aplicar a estrutura somente se houve um push para o branch principal que no meu caso e o master!
     terraform-creation:
         name: Criar infraestrutura
         needs: terraform-validate
