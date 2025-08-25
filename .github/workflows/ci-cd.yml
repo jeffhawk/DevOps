@@ -148,20 +148,15 @@ jobs:
               id: tf_outputs
               working-directory: infra/terraform
               run: |
-                terraform output -json > tf_outputs.json
-
-                # Verificação de integridade do JSON
-                jq . tf_outputs.json || exit 1
-
-                cat tf_outputs.json
 
                 # Extração dos valores
-                bucket=$(jq -r '.bucket_name.value' tf_outputs.json)
-                endpoint=$(jq -r '.website_endpoint.value' tf_outputs.json)
-
-                # Exportação como outputs do step
+                bucket=$(terraform output -raw bucket_name)
+                endpoint=$(terraform output -raw website_endpoint)
+                pwd
+                echo $bucket
                 echo "bucket_name=$bucket" >> $GITHUB_OUTPUT
                 echo "website_endpoint=$endpoint" >> $GITHUB_OUTPUT
+
 
 
 
