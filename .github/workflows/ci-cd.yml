@@ -149,9 +149,9 @@ jobs:
               working-directory: infra/terraform
               run: |
 
-                # Captura apenas a última "palavra" da saída
-                bucket=$(terraform output -raw bucket_name 2>/dev/null | awk '{print $NF}')
-                endpoint=$(terraform output -raw website_endpoint 2>/dev/null | awk '{print $NF}')
+                # Pega a linha que contém o valor e remove espaços/quebras
+                bucket=$(terraform output bucket_name 2>/dev/null | grep -Eo '^[^ ]+$' | grep -v bucket_name | grep -v '0\.' | grep -v '^0$' | tr -d '\n\r')
+                endpoint=$(terraform output website_endpoint 2>/dev/null | grep -Eo '^[^ ]+$' | grep -v website_endpoint | grep -v '0\.' | grep -v '^0$' | tr -d '\n\r')
 
                 # Mostra no log para debug
                 echo "Bucket tratado: $bucket"
