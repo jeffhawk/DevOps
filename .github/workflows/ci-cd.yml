@@ -14,6 +14,14 @@ jobs:
             - name: Checkout do código
               uses: actions/checkout@v4
 
+            - name: Cache do npm
+              uses: actions/cache@v4
+              with:
+                path: ~/.npm
+                key: ${{ runner.os }}-npm-cache-${{ hashFiles('**/package-lock.json') }}
+                restore-keys: |
+                  ${{ runner.os }}-npm-cache-
+
             - name: Install dependencies
               run: npm ci
 
@@ -95,8 +103,8 @@ jobs:
         if: github.ref == 'refs/heads/master' && github.event_name == 'push'
         runs-on: ubuntu-latest
         outputs:
-            bucket_name: ${{ steps.tfoutputs.outputs.bucket_name }}
-            website_endpoint: ${{ steps.tfoutputs.outputs.website_endpoint }}
+            bucket_name: ${{ steps.tf_outputs.outputs.bucket_name }}
+            website_endpoint: ${{ steps.tf_outputs.outputs.website_endpoint }}
         steps:
             - name: Checkout do código
               uses: actions/checkout@v4
@@ -130,16 +138,11 @@ jobs:
                 terraform apply -auto-approve plan.tfplan
 
             - name: Capturar saída
-              id: tfoutputs
+              id: tf_outputs
               working-directory: infra/terraform
               run: |
                 echo "bucket_name=$(terraform output -raw bucket_name | tr -d '\n')" >> $GITHUB_OUTPUT
                 echo "website_endpoint=$(terraform output -raw website_endpoint | tr -d '\n')" >> $GITHUB_OUTPUT
-
-            - name: Debug outputs
-              run: |
-                echo "Bucket: ${{ steps.tfoutputs.outputs.bucket_name }}"
-                echo "Endpoint: ${{ steps.tfoutputs.outputs.website_endpoint }}"
 
     #4 - Fazer o deploy do build para o bucket S3
     deploy:
@@ -172,7 +175,6 @@ jobs:
         - name: Fazer o upload do build para o S3
           run: |
             aws s3 sync build/ s3://${{ needs.terraform-creation.outputs.bucket_name }}/ --delete --acl public-read --cache-control "max-age=300, public"
-            echo "Website disponível em: http://${{ needs.terraform-creation.outputs.website_endpoint }}"
 
         - name: Exibir URL do site
           run: |
