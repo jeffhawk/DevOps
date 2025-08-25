@@ -20,7 +20,7 @@ jobs:
             #         node-version: '20'
 
             - name: Install dependencies
-              run: npm install
+              run: npm ci
 
             - name: Run tests
               run: npm test
@@ -32,10 +32,18 @@ jobs:
               run: ls -la build
 
             - name: Verificar se existe index.html
-              run: test -f build/index.html && echo "index.html encontrado" || echo "index.html não encontrado"
+              run: |
+                pwd
+                ls -l
+                if [ ! -f build/index.html ]; then
+                    echo "index.html não encontrado"
+                    exit 1
+                else
+                    echo "index.html encontrado"
+                fi
 
             - name: Upload build artifacts
               uses: actions/upload-artifact@v4
               with:
-                  name: build
-                  path: build
+                    name: build
+                    path: build
