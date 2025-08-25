@@ -157,8 +157,22 @@ jobs:
                 bucket=$(echo "$bucket" | xargs)
                 endpoint=$(echo "$endpoint" | xargs)
 
+                # Mostra no log para debug
+                echo "Bucket tratado: $bucket"
+                echo "Endpoint tratado: $endpoint"
+
+
                 echo "bucket_name=$bucket" >> $GITHUB_OUTPUT
                 echo "website_endpoint=$endpoint" >> $GITHUB_OUTPUT
+
+                # # Captura apenas o valor puro, sem logs do Actions
+                # bucket=$(terraform output -raw bucket_name 2>/dev/null | tr -d '\n' | tr -d '\r')
+                # endpoint=$(terraform output -raw website_endpoint 2>/dev/null | tr -d '\n' | tr -d '\r')
+
+                # # Exporta para outputs do step
+                # echo "bucket_name=$bucket" >> $GITHUB_OUTPUT
+                # echo "website_endpoint=$endpoint" >> $GITHUB_OUTPUT
+
 
 
     #4 - Fazer o deploy do build para o bucket S3
