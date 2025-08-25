@@ -1,44 +1,78 @@
-# DevOps – Fase 1 (React + EC2)
+# DevOps – Fase 1: Configuração e Automação Inicial
 
-Descrição do Projeto, Objetivos e Requisitos
+## Descrição
 
-Descrição:
+Este repositório implementa a Fase 1 do projeto **DevOps – Na Prática**. O objetivo é demonstrar um fluxo completo de automação com GitHub Actions e Terraform, provisionando infraestrutura como código e publicando um site estático simples no Amazon S3.
 
-O projeto consiste na implementação de um pipeline de automação e na criação de uma infraestrutura em nuvem para uma aplicação frontend de Gerenciamento de Coleção de Carrinhos Hotwheels. A aplicação, desenvolvida em ReactJS, permite ao usuário realizar operações de CRUD. O foco do projeto é a aplicação de práticas DevOps para automatizar o ciclo de vida do software, desde a integração de código até a preparação para o deploy em um ambiente de servidor web.
+## Tecnologias e Ferramentas
 
-Objetivos:
+- **Terraform** (v1.9.5)
+- **AWS CLI**
+- **GitHub Actions**
+- **Amazon S3**
 
-Automatizar o Build e Teste: Garantir que cada alteração no código-fonte seja automaticamente validada através de testes e que uma versão de produção (build) seja gerada com sucesso.
+## Infraestrutura
 
-Garantir a Qualidade do Código: Integrar ferramentas de análise estática (linting) no pipeline para manter um padrão de código consistente.
+- Bucket S3 configurado como site estático
+  - `index_document`: `index.html`
+  - `error_document`: `index.html`
+  - Versionamento habilitado
+  - Política pública de leitura (`s3:GetObject` em `arn:aws:s3:::${bucket_name}/*`)
+- Variáveis definidas em `infra/terraform/variables.tf`:
+  - `bucket_name`
+  - `aws_region`
+  - `environment`
+  - `project_name`
+- Permissões AWS (GitHub Secrets):
+  - `AWS_ACCESS_KEY_ID`
+  - `AWS_SECRET_ACCESS_KEY`
+  - `AWS_REGION`
+  - `S3_BUCKET_NAME`
 
-Implementar Infraestrutura como Código (IaC): Provisionar um servidor web na AWS de forma automatizada, versionada e replicável usando Terraform.
+## Pipeline CI/CD
 
-Estabelecer um Pipeline de CI: Configurar um fluxo de Integração Contínua (CI) no GitHub Actions que valide a integridade da aplicação a cada commit.
+O workflow em `.github/workflows/ci-cd.yml` executa três jobs:
 
-Frontend React (CRUD Hotwheels) com:
-- CI: GitHub Actions (build, testes e deploy em EC2 via SSH)
-- IaC: Terraform (EC2 Ubuntu + Nginx)
-- Testes: React Testing Library
+1. **terraform-validate**
+    - Checkout do repositório
+    - Instalação do Terraform
+    - `terraform init -input=false`
+    - `terraform fmt -check`
+    - `terraform validate`
+    - `terraform plan -out=plan.tfplan -var="bucket_name=${{ secrets.S3_BUCKET_NAME }}"`
+    - Upload do plano como artefato
 
-## Executar localmente
-npm ci
-npm start
+2. **terraform-apply** (executa apenas em push para `main`)
+    - Download do plano (`plan.tfplan`)
+    - `terraform apply -auto-approve plan.tfplan`
+    - Captura de outputs (`bucket_name`, `website_endpoint`)
 
-## Testes
-npm test
+3. **deploy**
+    - Configuração das credenciais AWS via `aws-actions/configure-aws-credentials@v4`
+    - `aws s3 sync site/ s3://${{ needs.terraform-apply.outputs.bucket_name }} --delete --acl public-read --cache-control "max-age=300, public"`
+    - Exibição da URL pública do site no log
 
-## Build
-npm run build
+## Estrutura de Pastas
 
-## Infra (Terraform)
-cd infra/terraform
-terraform init
-terraform plan -var "key_name=SEU_KEYPAIR" -var "allowed_ssh_cidr=0.0.0.0/0"
-terraform apply -auto-approve -var "key_name=SEU_KEYPAIR" -var "allowed_ssh_cidr=0.0.0.0/0"
+```
+DevOps/
+├── infra/terraform/
+│   ├── main.tf
+│   ├── variables.tf
+│   └── outputs.tf
+├── site/
+│   └── index.html
+├── .github/workflows/
+│   └── ci-cd.yml
+└── README.md
+```
 
-## Deploy automático
-Push na branch main → GitHub Actions roda CI e deploya no EC2.
-Secrets necessários:
-- EC2_PUBLIC_IP
-- EC2_SSH_PRIVATE_KEY
+## Execução Manual
+
+1. Acesse o diretório `infra/terraform`
+2. Execute:
+    ```sh
+    terraform init
+    terraform apply -var="bucket_name=SEU_BUCKET"
+    ```
+3. Acesse o endpoint retornado em `website_endpoint` no navegador
