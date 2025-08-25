@@ -194,7 +194,7 @@ jobs:
 
         - name: Fazer o upload do build para o S3
           run: |
-            aws s3 sync build/ s3://${{ needs.terraform-creation.outputs.bucket_name }}/ --delete --acl public-read --cache-control "max-age=300, public"
+            aws s3 sync build/ s3://${{ needs.terraform-creation.outputs.bucket_name }}/ --delete --cache-control "max-age=300, public"
 
         - name: Exibir URL do site
           run: |
