@@ -1,0 +1,41 @@
+name: CI/CD - DevOps Fase 1 - React/Terraform/S3
+
+on:
+    push:
+        branches: ["master"]
+    workflow_dispatch:
+
+jobs:
+    #1 - Seguindo as orientações das aulas, estou seguindo as melhores práticas de CI/CD, irei realizar os testes e o build no ambiente do github antes.
+    build-static:
+        name: Validacao dos arquivos estaticos
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout do código
+              uses: actions/checkout@v4
+
+            # - name: Set up Node.js
+            #   uses: actions/setup-node@v4
+            #   with:
+            #         node-version: '20'
+
+            - name: Install dependencies
+              run: npm install
+
+            - name: Run tests
+              run: npm test
+
+            - name: Build
+              run: npm run build
+
+            - name: Verificar a pasta build
+              run: ls -la build
+
+            - name: Verificar se existe index.html
+              run: test -f build/index.html && echo "index.html encontrado" || echo "index.html não encontrado"
+
+            - name: Upload build artifacts
+              uses: actions/upload-artifact@v3
+              with:
+                  name: build
+                  path: build

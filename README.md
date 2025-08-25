@@ -2,7 +2,7 @@
 
 ## Descrição
 
-Este repositório implementa a Fase 1 do projeto **DevOps – Na Prática**. O objetivo é demonstrar um fluxo completo de automação com GitHub Actions e Terraform, provisionando infraestrutura como código e publicando um site estático simples no Amazon S3.
+Este repositório é utilizado na Fase 1 do projeto **DevOps – Na Prática**. O objetivo é demonstrar um fluxo completo de automação com GitHub Actions e Terraform, provisionando infraestrutura como código e publicando um site estático simples no Amazon S3.
 
 ## Tecnologias e Ferramentas
 
@@ -60,7 +60,7 @@ DevOps/
 │   ├── main.tf
 │   ├── variables.tf
 │   └── outputs.tf
-├── site/
+├── build/
 │   └── index.html
 ├── .github/workflows/
 │   └── ci-cd.yml
