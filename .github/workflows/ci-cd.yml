@@ -132,10 +132,13 @@ jobs:
               id: tfoutputs
               working-directory: infra/terraform
               run: |
-                pwd
-                ls -la
                 echo "bucket_name=$(terraform output -raw bucket_name | tr -d '\n')" >> $GITHUB_OUTPUT
                 echo "website_endpoint=$(terraform output -raw website_endpoint | tr -d '\n')" >> $GITHUB_OUTPUT
+
+            - name: Debug outputs
+              run: |
+                echo "Bucket: $bucket_name"
+                echo "Endpoint: $website_endpoint"
 
     #4 - Fazer o deploy do build para o bucket S3
     deploy:
@@ -159,6 +162,11 @@ jobs:
             aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
             aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
             aws-region: us-east-1
+
+        - name: Debug outputs
+          run: |
+            echo "Bucket: ${{ needs.terraform-creation.outputs.bucket_name }}"
+            echo "Endpoint: ${{ needs.terraform-creation.outputs.website_endpoint }}"
 
         - name: Fazer o upload do build para o S3
           run: |
