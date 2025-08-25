@@ -129,6 +129,8 @@ jobs:
               id: tfoutputs
               working-directory: infra/terraform
               run: |
+                pwd
+                ls -la
                 echo "bucket_name=$(terraform output -raw bucket_name)" >> $GITHUB_OUTPUT
                 echo "website_endpoint=$(terraform output -raw website_endpoint)" >> $GITHUB_OUTPUT
 
