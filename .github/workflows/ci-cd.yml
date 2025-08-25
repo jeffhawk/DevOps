@@ -145,19 +145,19 @@ jobs:
               working-directory: infra/terraform
               run: |
                 cat tf_outputs.json
-                node -e "console.log(require('./tf_outputs.json').bucket_name.value)"
-                node -e "console.log(require('./tf_outputs.json').website_endpoint.value)"
+                jq -r '.bucket_name.value' tf_outputs.json
+                jq -r '.website_endpoint.value' tf_outputs.json
 
             - name: Capturar saída
               id: tf_outputs
               working-directory: infra/terraform
               run: |
-                terraform output -json > tf_outputs.json
                 cat tf_outputs.json
                 bucket=$(jq -r '.bucket_name.value' tf_outputs.json)
                 endpoint=$(jq -r '.website_endpoint.value' tf_outputs.json)
                 echo "bucket_name=$bucket" >> $GITHUB_OUTPUT
                 echo "website_endpoint=$endpoint" >> $GITHUB_OUTPUT
+
 
 
     #4 - Fazer o deploy do build para o bucket S3
@@ -196,3 +196,40 @@ jobs:
           run: |
             echo 'Site publicado em: http://${{ needs.terraform-creation.outputs.website_endpoint }}'
 
+    destroy-on-failure:
+      name: Destruir infraestrutura em caso de erro
+      runs-on: ubuntu-latest
+      if: failure()
+      steps:
+        - name: Checkout do código
+          uses: actions/checkout@v4
+
+        - name: Configurar credenciais AWS
+          uses: aws-actions/configure-aws-credentials@v4
+          with:
+            aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+            aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+            aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+            aws-region: us-east-1
+
+        - name: Instalar Terraform
+          uses: hashicorp/setup-terraform@v2
+          with:
+            terraform_version: 1.9.5
+
+        - name: Inicializar Terraform
+          working-directory: infra/terraform
+          run: terraform init -input=false
+
+        - name: Esvaziar bucket S3 (se existir)
+          run: |
+            bucket=$(terraform output -raw bucket_name 2>/dev/null || echo "")
+            if [ -n "$bucket" ]; then
+              aws s3 rm s3://$bucket --recursive || echo "Bucket não encontrado ou já vazio"
+            else
+              echo "Bucket não definido no estado atual"
+            fi
+
+        - name: Destruir infraestrutura
+          working-directory: infra/terraform
+          run: terraform destroy -auto-approve
