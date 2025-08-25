@@ -141,22 +141,22 @@ jobs:
               working-directory: infra/terraform
               run: terraform output -json 2>/dev/null > tf_outputs.json
 
-            - name: Verificar outputs do Terraform.
-              working-directory: infra/terraform
-              run: |
-                cat tf_outputs.json
-                jq -r '.bucket_name.value' tf_outputs.json
-                jq -r '.website_endpoint.value' tf_outputs.json
+            - name: Verificar versão do jq
+              run: jq --version
 
             - name: Capturar saída
               id: tf_outputs
               working-directory: infra/terraform
               run: |
+                echo "Arquivo JSON gerado:"
                 cat tf_outputs.json
+
                 bucket=$(jq -r '.bucket_name.value' tf_outputs.json)
                 endpoint=$(jq -r '.website_endpoint.value' tf_outputs.json)
+
                 echo "bucket_name=$bucket" >> $GITHUB_OUTPUT
                 echo "website_endpoint=$endpoint" >> $GITHUB_OUTPUT
+
 
 
 
