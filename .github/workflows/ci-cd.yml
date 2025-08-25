@@ -98,7 +98,7 @@ jobs:
 
     #3 - Irá aplicar a estrutura somente se houve um push para o branch principal que no meu caso e o master!
     terraform-creation:
-        name: Criar infraestrutura
+        name: Criar infraestrutura na AWS
         needs: terraform-validate
         if: github.ref == 'refs/heads/master' && github.event_name == 'push'
         runs-on: ubuntu-latest
