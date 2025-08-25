@@ -8,7 +8,7 @@ on:
 jobs:
     #1 - Seguindo as orientações das aulas, estou seguindo as melhores práticas de CI/CD, irei realizar os testes e o build no ambiente do github antes.
     build-static:
-        name: Validacao dos arquivos estaticos
+        name: Validacao dos arquivos
         runs-on: ubuntu-latest
         steps:
             - name: Checkout do código
@@ -43,3 +43,42 @@ jobs:
               with:
                     name: build
                     path: build/
+
+    #2 - Agora que o build foi validado, irei gerar a infra, começando com a validação do terraform
+    terraform-validate:
+        name: Validação e planejamento do Terraform
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout do código
+              uses: actions/checkout@v4
+
+            - name: Instalar Terraform
+              uses: hashicorp/setup-terraform@v2
+              with:
+                  terraform_version: 1.9.5
+
+            - name: Iniciar Terraform
+              working-directory: infra/terraform
+              run: terraform init -input=false
+
+            - name: Verificar formatação
+              working-directory: infra/terraform
+              run: terraform fmt -check
+
+            - name: Validar configuração
+              working-directory: infra/terraform
+              run: terraform validate
+
+            - name: Planejar infraestrutura
+              working-directory: infra/terraform
+              run: terraform plan -out=tfplan \
+                -var="project_name=hotwheels-frontend" \
+                -var="environment=dev" \
+                -var="aws_region=us-east-1" \
+                -var="enable_public_access=true"
+
+            - name: Salvar plano como artefato
+              uses: actions/upload-artifact@v4
+              with:
+                  name: tfplan
+                  path: infra/terraform/tfplan
