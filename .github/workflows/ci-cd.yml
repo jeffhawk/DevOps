@@ -137,8 +137,8 @@ jobs:
 
             - name: Debug outputs
               run: |
-                echo "Bucket: $bucket_name"
-                echo "Endpoint: $website_endpoint"
+                echo "Bucket: $(bucket_name)"
+                echo "Endpoint: $(website_endpoint)"
 
     #4 - Fazer o deploy do build para o bucket S3
     deploy:
