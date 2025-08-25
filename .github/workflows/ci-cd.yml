@@ -139,7 +139,7 @@ jobs:
 
             - name: Exportar outputs para JSON
               working-directory: infra/terraform
-              run: terraform output -json > tf_outputs.json 2>/dev/null
+              run: terraform output -json 2>/dev/null > tf_outputs.json
 
             - name: Verificar outputs do Terraform.
               working-directory: infra/terraform
@@ -150,8 +150,8 @@ jobs:
               id: tf_outputs
               working-directory: infra/terraform
               run: |
-                bucket=$(node -pe "require('./tf_outputs.json').bucket_name.value")
-                endpoint=$(node -pe "require('./tf_outputs.json').website_endpoint.value")
+                bucket=$(node -pe "JSON.parse(fs.readFileSync('tf_outputs.json')).bucket_name.value" -e "const fs=require('fs')")
+                endpoint=$(node -pe "JSON.parse(fs.readFileSync('tf_outputs.json')).website_endpoint.value" -e "const fs=require('fs')")
                 echo "bucket_name=$bucket" >> $GITHUB_OUTPUT
                 echo "website_endpoint=$endpoint" >> $GITHUB_OUTPUT
 

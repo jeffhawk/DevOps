@@ -1,0 +1,12 @@
+{
+  "bucket_name": {
+    "sensitive": false,
+    "type": "string",
+    "value": "aula-devops-hotwheels"
+  },
+  "website_endpoint": {
+    "sensitive": false,
+    "type": "string",
+    "value": "aula-devops-hotwheels.s3-website-us-east-1.amazonaws.com"
+  }
+}
