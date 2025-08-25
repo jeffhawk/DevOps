@@ -137,9 +137,9 @@ jobs:
               run: |
                 terraform apply -auto-approve plan.tfplan
 
-            - name: Exportar outputs para JSON
-              working-directory: infra/terraform
-              run: terraform output -json 2>/dev/null > tf_outputs.json
+            # - name: Exportar outputs para JSON
+            #   working-directory: infra/terraform
+            #   run: terraform output -json 2>/dev/null > tf_outputs.json
 
             - name: Verificar versão do jq
               run: jq --version
@@ -148,14 +148,21 @@ jobs:
               id: tf_outputs
               working-directory: infra/terraform
               run: |
-                echo "Arquivo JSON gerado:"
+                terraform output -json > tf_outputs.json
+
+                # Verificação de integridade do JSON
+                jq . tf_outputs.json || exit 1
+
                 cat tf_outputs.json
 
+                # Extração dos valores
                 bucket=$(jq -r '.bucket_name.value' tf_outputs.json)
                 endpoint=$(jq -r '.website_endpoint.value' tf_outputs.json)
 
+                # Exportação como outputs do step
                 echo "bucket_name=$bucket" >> $GITHUB_OUTPUT
                 echo "website_endpoint=$endpoint" >> $GITHUB_OUTPUT
+
 
 
 
@@ -195,41 +202,3 @@ jobs:
         - name: Exibir URL do site
           run: |
             echo 'Site publicado em: http://${{ needs.terraform-creation.outputs.website_endpoint }}'
-
-    destroy-on-failure:
-      name: Destruir infraestrutura em caso de erro
-      runs-on: ubuntu-latest
-      if: failure()
-      steps:
-        - name: Checkout do código
-          uses: actions/checkout@v4
-
-        - name: Configurar credenciais AWS
-          uses: aws-actions/configure-aws-credentials@v4
-          with:
-            aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-            aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-            aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
-            aws-region: us-east-1
-
-        - name: Instalar Terraform
-          uses: hashicorp/setup-terraform@v2
-          with:
-            terraform_version: 1.9.5
-
-        - name: Inicializar Terraform
-          working-directory: infra/terraform
-          run: terraform init -input=false
-
-        - name: Esvaziar bucket S3 (se existir)
-          run: |
-            bucket=$(terraform output -raw bucket_name 2>/dev/null || echo "")
-            if [ -n "$bucket" ]; then
-              aws s3 rm s3://$bucket --recursive || echo "Bucket não encontrado ou já vazio"
-            else
-              echo "Bucket não definido no estado atual"
-            fi
-
-        - name: Destruir infraestrutura
-          working-directory: infra/terraform
-          run: terraform destroy -auto-approve
