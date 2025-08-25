@@ -40,7 +40,7 @@ jobs:
             - name: Verificar se existe index.html
               run: |
                 if [ ! -f build/index.html ]; then
-                    echo "index.html não encontrado"
+                    echo "index.html não encontrado!"
                     exit 1
                 else
                     echo "index.html encontrado"
