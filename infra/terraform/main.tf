@@ -46,7 +46,7 @@ resource "aws_s3_bucket_versioning" "versioning" {
 }
 
 resource "aws_s3_bucket_public_access_block" "public_block" {
-  count = var.enable_public_access ? 1 : 0
+  count  = var.enable_public_access ? 1 : 0
   bucket = aws_s3_bucket.site.id
 
   block_public_acls       = false
@@ -56,7 +56,7 @@ resource "aws_s3_bucket_public_access_block" "public_block" {
 }
 
 resource "aws_s3_bucket_policy" "site_policy" {
-  count = var.enable_public_access ? 1 : 0
+  count  = var.enable_public_access ? 1 : 0
   bucket = aws_s3_bucket.site.id
   policy = jsonencode({
     Version = "2012-10-17"
@@ -65,8 +65,8 @@ resource "aws_s3_bucket_policy" "site_policy" {
         Sid       = "PublicReadGetObject"
         Effect    = "Allow"
         Principal = "*"
-        Action    = [ "s3:GetObject" ]
-        Resource  = [ "${aws_s3_bucket.site.arn}/*" ]
+        Action    = ["s3:GetObject"]
+        Resource  = ["${aws_s3_bucket.site.arn}/*"]
       }
     ]
   })
