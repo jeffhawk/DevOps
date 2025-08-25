@@ -80,7 +80,7 @@ jobs:
 
             - name: Planejar infraestrutura
               working-directory: infra/terraform
-              run: terraform plan -out=plan.tfplan -var="project_name=hotwheels-frontend" -var="aws_region=us-east-1" -var="enable_public_access=true"
+              run: terraform plan -out=plan.tfplan
 
             - name: Salvar plano como artefato
               uses: actions/upload-artifact@v4
