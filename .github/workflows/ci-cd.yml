@@ -140,14 +140,14 @@ jobs:
       needs: terraform-creation
       runs-on: ubuntu-latest
       steps:
+        - name: Checkout do código
+          uses: actions/checkout@v4
+
         - name: Baixar o build
           uses: actions/download-artifact@v4
           with:
             name: build
             path: build/
-
-        - name: Checkout do código
-          uses: actions/checkout@v4
 
         - name: Configurar as credenciais de acesso AWS
           uses: aws-actions/configure-aws-credentials@v4
