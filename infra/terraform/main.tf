@@ -69,4 +69,9 @@ resource "aws_s3_bucket_policy" "site_policy" {
       }
     ]
   })
+  depends_on = [
+    aws_s3_bucket_public_access_block.public_block,
+    aws_s3_bucket_website_configuration.site_config,
+    aws_s3_bucket_versioning.versioning
+  ]
 }
