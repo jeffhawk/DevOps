@@ -137,13 +137,6 @@ jobs:
               run: |
                 terraform apply -auto-approve plan.tfplan
 
-            # - name: Exportar outputs para JSON
-            #   working-directory: infra/terraform
-            #   run: terraform output -json 2>/dev/null > tf_outputs.json
-
-            - name: Verificar versão do jq
-              run: jq --version
-
             - name: Capturar saída
               id: tf_outputs
               working-directory: infra/terraform
@@ -153,6 +146,10 @@ jobs:
                 bucket=$(terraform output bucket_name 2>/dev/null | grep -Eo '^[^ ]+$' | grep -v bucket_name | grep -v '0\.' | grep -v '^0$' | tr -d '\n\r')
                 endpoint=$(terraform output website_endpoint 2>/dev/null | grep -Eo '^[^ ]+$' | grep -v website_endpoint | grep -v '0\.' | grep -v '^0$' | tr -d '\n\r')
 
+                # Remove aspas residuais e espaços nas pontas
+                bucket=$(echo "$bucket" | sed 's/^"//; s/"$//' | xargs)
+                endpoint=$(echo "$endpoint" | sed 's/^"//; s/"$//' | xargs)
+
                 # Mostra no log para debug
                 echo "Bucket tratado: $bucket"
                 echo "Endpoint tratado: $endpoint"
@@ -160,9 +157,6 @@ jobs:
                 # Exporta para outputs do step
                 echo "bucket_name=$bucket" >> $GITHUB_OUTPUT
                 echo "website_endpoint=$endpoint" >> $GITHUB_OUTPUT
-
-
-
 
     #4 - Fazer o deploy do build para o bucket S3
     deploy:
