@@ -153,6 +153,10 @@ jobs:
                 bucket=$(terraform output -raw bucket_name 2>/dev/null | sed 's/::.*//' | xargs)
                 endpoint=$(terraform output -raw website_endpoint 2>/dev/null | sed 's/::.*//' | xargs)
 
+                # Mostra no log para debug
+                echo "Bucket tratado: $bucket"
+                echo "Endpoint tratado: $endpoint"
+
                 # Remove espaços extras
                 bucket=$(echo "$bucket" | xargs)
                 endpoint=$(echo "$endpoint" | xargs)
