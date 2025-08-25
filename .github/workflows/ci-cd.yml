@@ -150,8 +150,8 @@ jobs:
               id: tf_outputs
               working-directory: infra/terraform
               run: |
-                bucket=$(jq -r .bucket_name.value tf_outputs.json)
-                endpoint=$(jq -r .website_endpoint.value tf_outputs.json)
+                bucket=$(node -pe "require('./tf_outputs.json').bucket_name.value")
+                endpoint=$(node -pe "require('./tf_outputs.json').website_endpoint.value")
                 echo "bucket_name=$bucket" >> $GITHUB_OUTPUT
                 echo "website_endpoint=$endpoint" >> $GITHUB_OUTPUT
 
