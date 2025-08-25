@@ -131,8 +131,8 @@ jobs:
               run: |
                 pwd
                 ls -la
-                echo "bucket_name=$(terraform output -raw bucket_name)" >> $GITHUB_OUTPUT
-                echo "website_endpoint=$(terraform output -raw website_endpoint)" >> $GITHUB_OUTPUT
+                echo "bucket_name=$(terraform output -raw bucket_name | tr -d '\n')" >> $GITHUB_OUTPUT
+                echo "website_endpoint=$(terraform output -raw website_endpoint | tr -d '\n')" >> $GITHUB_OUTPUT
 
     #4 - Fazer o deploy do build para o bucket S3
     deploy:
