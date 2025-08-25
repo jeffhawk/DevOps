@@ -94,6 +94,9 @@ jobs:
         needs: terraform-validate
         if: github.ref == 'refs/heads/master' && github.event_name == 'push'
         runs-on: ubuntu-latest
+        outputs:
+            bucket_name: ${{ steps.tfoutputs.outputs.bucket_name }}
+            website_endpoint: ${{ steps.tfoutputs.outputs.website_endpoint }}
         steps:
             - name: Checkout do código
               uses: actions/checkout@v4
