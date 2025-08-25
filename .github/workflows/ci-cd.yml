@@ -150,8 +150,8 @@ jobs:
               run: |
 
                 # Captura e limpa tudo antes do '::'
-                bucket=$(terraform output -raw bucket_name 2>/dev/null | tr -d '\n' | tr -d '\r')
-                endpoint=$(terraform output -raw website_endpoint 2>/dev/null | tr -d '\n' | tr -d '\r')
+                bucket=$(terraform output -raw bucket_name 2>/dev/null | sed 's/::.*//' | xargs)
+                endpoint=$(terraform output -raw website_endpoint 2>/dev/null | sed 's/::.*//' | xargs)
 
                 # Remove espaços extras
                 bucket=$(echo "$bucket" | xargs)
@@ -162,8 +162,8 @@ jobs:
                 echo "Endpoint tratado: $endpoint"
 
 
-                echo "bucket_name=$bucket" >> $GITHUB_OUTPUT
-                echo "website_endpoint=$endpoint" >> $GITHUB_OUTPUT
+                echo "bucket_name = $bucket" >> $GITHUB_OUTPUT
+                echo "website_endpoint = $endpoint" >> $GITHUB_OUTPUT
 
                 # # Captura apenas o valor puro, sem logs do Actions
                 # bucket=$(terraform output -raw bucket_name 2>/dev/null | tr -d '\n' | tr -d '\r')
