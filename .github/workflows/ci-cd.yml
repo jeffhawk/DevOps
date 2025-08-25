@@ -137,18 +137,21 @@ jobs:
               run: |
                 terraform apply -auto-approve plan.tfplan
 
+            - name: Exportar outputs para JSON
+              working-directory: infra/terraform
+              run: terraform output -json > tf_outputs.json
+
             - name: Verificar outputs do Terraform.
               working-directory: infra/terraform
               run: |
-                terraform output -raw bucket_name | tail -n 1
-                terraform output -raw website_endpoint | tail -n 1
+                cat tf_outputs.json
 
             - name: Capturar saída
               id: tf_outputs
               working-directory: infra/terraform
               run: |
-                bucket=$(terraform output -raw bucket_name | tail -n 1)
-                endpoint=$(terraform output -raw website_endpoint | tail -n 1)
+                bucket=$(jq -r .bucket_name.value tf_outputs.json)
+                endpoint=$(jq -r .website_endpoint.value tf_outputs.json)
                 echo "bucket_name=$bucket" >> $GITHUB_OUTPUT
                 echo "website_endpoint=$endpoint" >> $GITHUB_OUTPUT
 
