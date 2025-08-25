@@ -149,17 +149,16 @@ jobs:
               working-directory: infra/terraform
               run: |
 
-                # Extração dos valores
-                bucket=$(terraform output -raw bucket_name)
-                endpoint=$(terraform output -raw website_endpoint)
-                pwd
-                echo $bucket
+                # Captura e limpa tudo antes do '::'
+                bucket=$(terraform output -raw bucket_name | sed 's/::.*//')
+                endpoint=$(terraform output -raw website_endpoint | sed 's/::.*//')
+
+                # Remove espaços extras
+                bucket=$(echo "$bucket" | xargs)
+                endpoint=$(echo "$endpoint" | xargs)
+
                 echo "bucket_name=$bucket" >> $GITHUB_OUTPUT
                 echo "website_endpoint=$endpoint" >> $GITHUB_OUTPUT
-
-
-
-
 
 
     #4 - Fazer o deploy do build para o bucket S3
