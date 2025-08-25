@@ -140,15 +140,15 @@ jobs:
             - name: Verificar outputs do Terraform.
               working-directory: infra/terraform
               run: |
-                terraform output -raw bucket_name
-                terraform output -raw website_endpoint
+                terraform output -raw bucket_name | tail -n 1
+                terraform output -raw website_endpoint | tail -n 1
 
             - name: Capturar saída
               id: tf_outputs
               working-directory: infra/terraform
               run: |
-                bucket=$(terraform output -json | jq -r .bucket_name.value)
-                endpoint=$(terraform output -json | jq -r .website_endpoint.value)
+                bucket=$(terraform output -raw bucket_name | tail -n 1)
+                endpoint=$(terraform output -raw website_endpoint | tail -n 1)
                 echo "bucket_name=$bucket" >> $GITHUB_OUTPUT
                 echo "website_endpoint=$endpoint" >> $GITHUB_OUTPUT
 
