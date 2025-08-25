@@ -141,8 +141,8 @@ jobs:
               id: tf_outputs
               working-directory: infra/terraform
               run: |
-                echo "bucket_name=$(terraform output -raw bucket_name)" >> $GITHUB_OUTPUT
-                echo "website_endpoint=$(terraform output -raw website_endpoint)" >> $GITHUB_OUTPUT
+                echo "bucket_name=$(terraform output -raw bucket_name | tr -d '\n' | tr -d '\r')" >> $GITHUB_OUTPUT
+                echo "website_endpoint=$(terraform output -raw website_endpoint | tr -d '\n' | tr -d '\r')" >> $GITHUB_OUTPUT
 
 
     #4 - Fazer o deploy do build para o bucket S3
