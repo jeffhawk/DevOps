@@ -1,4 +1,4 @@
-# DevOps – Fase 1: Configuração e Automação Inicial
+# DevOps – Fase 1: Configuração e Criação do Pipeline CI/CD Inicial
 
 ## Descrição
 
@@ -7,27 +7,24 @@ Este repositório é utilizado na Fase 1 do projeto **DevOps – Na Prática**. 
 ## Tecnologias e Ferramentas
 
 - **Terraform** (v1.9.5)
-- **AWS CLI**
+- **ReactJS**
 - **GitHub Actions**
 - **Amazon S3**
 
 ## Infraestrutura
 
-- Bucket S3 configurado como site estático
+- Cria Bucket S3 configurado como site estático
   - `index_document`: `index.html`
   - `error_document`: `index.html`
-  - Versionamento habilitado
   - Política pública de leitura (`s3:GetObject` em `arn:aws:s3:::${bucket_name}/*`)
 - Variáveis definidas em `infra/terraform/variables.tf`:
   - `bucket_name`
   - `aws_region`
-  - `environment`
   - `project_name`
 - Permissões AWS (GitHub Secrets):
   - `AWS_ACCESS_KEY_ID`
   - `AWS_SECRET_ACCESS_KEY`
-  - `AWS_REGION`
-  - `S3_BUCKET_NAME`
+  - `AWS_SESSION_TOKEN`
 
 ## Pipeline CI/CD
 
@@ -47,7 +44,7 @@ O workflow em `.github/workflows/ci-cd.yml` é dividido em quatro etapas:
     - `terraform plan -out=plan.tfplan -var="bucket_name=${{ secrets.S3_BUCKET_NAME }}"`
     - Upload do plano como artefato
 
-3. **terraform-apply**
+3. **terraform-create**
    Executa o `terraform apply` somente em push para a branch `main`, aplicando o plano gerado e capturando os outputs (`bucket_name`, `website_endpoint`).
     - Download do plano (`plan.tfplan`)
     - `terraform apply -auto-approve plan.tfplan`
