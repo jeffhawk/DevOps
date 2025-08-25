@@ -47,6 +47,7 @@ jobs:
     #2 - Agora que o build foi validado, irei gerar a infra, começando com a validação do terraform
     terraform-validate:
         name: Validação e planejamento do Terraform
+        needs: build-static
         runs-on: ubuntu-latest
         steps:
             - name: Checkout do código
