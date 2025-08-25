@@ -137,7 +137,7 @@ jobs:
               run: |
                 terraform apply -auto-approve plan.tfplan
 
-            - name: Verificar outputs do Terraform
+            - name: Verificar outputs do Terraform.
               working-directory: infra/terraform
               run: |
                 terraform output -raw bucket_name
