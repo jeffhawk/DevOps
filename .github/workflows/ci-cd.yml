@@ -145,13 +145,15 @@ jobs:
               working-directory: infra/terraform
               run: |
                 cat tf_outputs.json
+                node -e "console.log(require('./tf_outputs.json').bucket_name.value)"
+                node -e "console.log(require('./tf_outputs.json').website_endpoint.value)"
 
             - name: Capturar saída
               id: tf_outputs
               working-directory: infra/terraform
               run: |
-                bucket=$(node -pe "JSON.parse(fs.readFileSync('tf_outputs.json')).bucket_name.value" -e "const fs=require('fs')")
-                endpoint=$(node -pe "JSON.parse(fs.readFileSync('tf_outputs.json')).website_endpoint.value" -e "const fs=require('fs')")
+                bucket=$(node -e "console.log(require('./tf_outputs.json').bucket_name.value)")
+                endpoint=$(node -e "console.log(require('./tf_outputs.json').website_endpoint.value)")
                 echo "bucket_name=$bucket" >> $GITHUB_OUTPUT
                 echo "website_endpoint=$endpoint" >> $GITHUB_OUTPUT
 
