@@ -7,7 +7,7 @@ variable "aws_region" {
 variable "project_name" {
   description = "Nome do projeto para identificação e tags"
   type        = string
-  default     = "hotwheels-frontend"
+  default     = "aula-devops-hotwheels"
 }
 
 variable "enable_public_access" {
