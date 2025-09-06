@@ -164,7 +164,7 @@ jobs:
 
       - name: Atualizar ECS Service
         run: |
-          echo "Verificando variáveis de output"
+          echo "Verificando as variáveis de output"
           echo "Cluster: ${{ needs.terraform-provision.outputs.ecs_cluster }}"
           echo "Serviço: ${{ needs.terraform-provision.outputs.ecs_service }}"
           aws ecs update-service \
