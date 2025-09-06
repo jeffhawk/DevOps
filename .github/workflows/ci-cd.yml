@@ -100,7 +100,7 @@ jobs:
     terraform-creation:
         name: Criar infraestrutura na AWS
         needs: terraform-validate
-        if: github.ref == 'refs/heads/master' && github.event_name == 'push'
+        # if: github.ref == 'refs/heads/master' && github.event_name == 'push'
         runs-on: ubuntu-latest
         outputs:
             bucket_name: ${{ steps.tf_outputs.outputs.bucket_name }}
@@ -142,6 +142,7 @@ jobs:
               working-directory: infra/terraform
               run: |
 
+                # Esta foi a parte que mais me deu problema pois queria deixar o mais automatizado possível, porém em algum momento o GitHub Actions se perdia no valor das variáveis
                 # Pega a linha que contém o valor e remove espaços/quebras
                 bucket=$(terraform output bucket_name 2>/dev/null | grep -Eo '^[^ ]+$' | grep -v bucket_name | grep -v '0\.' | grep -v '^0$' | tr -d '\n\r')
                 endpoint=$(terraform output website_endpoint 2>/dev/null | grep -Eo '^[^ ]+$' | grep -v website_endpoint | grep -v '0\.' | grep -v '^0$' | tr -d '\n\r')
