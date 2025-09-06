@@ -98,9 +98,14 @@ jobs:
         id: tf_outputs
         working-directory: infra/terraform
         run: |
-          ecr_repo=$(terraform output -raw ecr_repository_url)
-          ecs_cluster=$(terraform output -raw ecs_cluster_name)
-          ecs_service=$(terraform output -raw ecs_service_name)
+          ecr_repo=$(terraform output ecr_repository_url 2>/dev/null | grep -Eo '^[^ ]+$' | grep -v bucket_name | grep -v '0\.' | grep -v '^0$' | tr -d '\n\r')
+          ecs_cluster=$(terraform output ecs_cluster_name 2>/dev/null | grep -Eo '^[^ ]+$' | grep -v bucket_name | grep -v '0\.' | grep -v '^0$' | tr -d '\n\r')
+          ecs_service=$(terraform output ecs_service_name 2>/dev/null | grep -Eo '^[^ ]+$' | grep -v bucket_name | grep -v '0\.' | grep -v '^0$' | tr -d '\n\r')
+
+          echo "ECR Repository URL: $ecr_repo"
+          echo "ECS Cluster Name: $ecs_cluster"
+          echo "ECS Service Name: $ecs_service"
+          
           echo "ecr_repo=$ecr_repo" >> $GITHUB_OUTPUT
           echo "ecs_cluster=$ecs_cluster" >> $GITHUB_OUTPUT
           echo "ecs_service=$ecs_service" >> $GITHUB_OUTPUT
