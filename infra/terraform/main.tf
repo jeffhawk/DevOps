@@ -11,67 +11,67 @@ provider "aws" {
   region = var.aws_region
 }
 
-locals {
-  bucket_name = var.project_name
-}
-
-resource "aws_s3_bucket" "site" {
-  bucket = local.bucket_name
-
-  tags = {
-    Name    = local.bucket_name
-    Project = var.project_name
-    Owner   = "Jefferson Eduardo"
+# Repositório ECR
+resource "aws_ecr_repository" "app" {
+  name                 = var.project_name
+  image_tag_mutability = "MUTABLE"
+  image_scanning_configuration {
+    scan_on_push = true
   }
 }
 
-resource "aws_s3_bucket_website_configuration" "site_config" {
-  bucket = aws_s3_bucket.site.id
-
-  index_document {
-    suffix = "index.html"
-  }
-
-  error_document {
-    key = "index.html"
-  }
+# Cluster ECS
+resource "aws_ecs_cluster" "main" {
+  name = "${var.project_name}-cluster"
 }
 
-resource "aws_s3_bucket_versioning" "versioning" {
-  bucket = aws_s3_bucket.site.id
+# Task Definition usando LabRole e padrão do professor
+resource "aws_ecs_task_definition" "app" {
+  family                   = "${var.project_name}-task"
+  network_mode             = "awsvpc"
+  requires_compatibilities = ["FARGATE"]
 
-  versioning_configuration {
-    status = "Enabled"
+  # CPU e memória conforme padrão do professor
+  cpu    = var.cpu
+  memory = var.memory
+
+  # Sistema Operacional e arquitetura
+  runtime_platform {
+    operating_system_family = "LINUX"
+    cpu_architecture        = "X86_64"
   }
+
+  # Usar a role padrão do laboratório
+  execution_role_arn = "arn:aws:iam::${var.account_id}:role/LabRole"
+  task_role_arn      = "arn:aws:iam::${var.account_id}:role/LabRole"
+
+  container_definitions = jsonencode([
+    {
+      name      = var.project_name
+      image     = "${aws_ecr_repository.app.repository_url}:latest"
+      essential = true
+      portMappings = [
+        {
+          containerPort = 80
+          hostPort      = 80
+          protocol      = "tcp"
+        }
+      ]
+    }
+  ])
 }
 
-resource "aws_s3_bucket_public_access_block" "public_block" {
-  count  = var.enable_public_access ? 1 : 0
-  bucket = aws_s3_bucket.site.id
+# Service ECS
+resource "aws_ecs_service" "app" {
+  name            = "${var.project_name}-service"
+  cluster         = aws_ecs_cluster.main.id
+  task_definition = aws_ecs_task_definition.app.arn
+  desired_count   = var.desired_count
+  launch_type     = "FARGATE"
 
-  block_public_acls       = false
-  block_public_policy     = false
-  ignore_public_acls      = false
-  restrict_public_buckets = false
-}
-
-resource "aws_s3_bucket_policy" "site_policy" {
-  count  = var.enable_public_access ? 1 : 0
-  bucket = aws_s3_bucket.site.id
-  policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Effect    = "Allow"
-        Principal = "*"
-        Action    = ["s3:GetObject"]
-        Resource  = ["${aws_s3_bucket.site.arn}/*"]
-      }
-    ]
-  })
-  depends_on = [
-    aws_s3_bucket_public_access_block.public_block,
-    aws_s3_bucket_website_configuration.site_config,
-    aws_s3_bucket_versioning.versioning
-  ]
+  network_configuration {
+    subnets         = var.subnet_ids
+    security_groups = var.security_group_ids
+    assign_public_ip = true
+  }
 }
