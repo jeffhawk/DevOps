@@ -100,7 +100,7 @@ jobs:
     terraform-creation:
         name: Criar infraestrutura na AWS
         needs: terraform-validate
-        if: github.ref == 'refs/heads/master' && github.event_name == 'push'
+        # if: github.ref == 'refs/heads/master' && github.event_name == 'push'
         runs-on: ubuntu-latest
         outputs:
             bucket_name: ${{ steps.tf_outputs.outputs.bucket_name }}
