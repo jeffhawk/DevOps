@@ -102,10 +102,14 @@ jobs:
           ecs_cluster=$(terraform output ecs_cluster_name 2>/dev/null | grep -Eo '^[^ ]+$' | grep -v bucket_name | grep -v '0\.' | grep -v '^0$' | tr -d '\n\r')
           ecs_service=$(terraform output ecs_service_name 2>/dev/null | grep -Eo '^[^ ]+$' | grep -v bucket_name | grep -v '0\.' | grep -v '^0$' | tr -d '\n\r')
 
+          ecr_repo=$(echo $ecr_repo | sed 's/^"//; s/"$//' | xargs)
+          ecs_cluster=$(echo $ecs_cluster | sed 's/^"//; s/"$//' | xargs)
+          ecs_service=$(echo $ecs_service | sed 's/^"//; s/"$//' | xargs)
+
           echo "ECR Repository URL: $ecr_repo"
           echo "ECS Cluster Name: $ecs_cluster"
           echo "ECS Service Name: $ecs_service"
-          
+
           echo "ecr_repo=$ecr_repo" >> $GITHUB_OUTPUT
           echo "ecs_cluster=$ecs_cluster" >> $GITHUB_OUTPUT
           echo "ecs_service=$ecs_service" >> $GITHUB_OUTPUT
@@ -140,8 +144,8 @@ jobs:
 
       - name: Build e push da imagem
         run: |
-          docker build -t minhaapp .
-          docker tag minhaapp:latest ${{ needs.terraform-provision.outputs.ecr_repo }}:latest
+          docker build -t hotwheels .
+          docker tag hotwheels:latest ${{ needs.terraform-provision.outputs.ecr_repo }}:latest
           docker push ${{ needs.terraform-provision.outputs.ecr_repo }}:latest
 
   # 4 - Deploy no ECS
@@ -160,6 +164,9 @@ jobs:
 
       - name: Atualizar ECS Service
         run: |
+          echo "Verificando variáveis de output"
+          echo "Cluster: ${{ needs.terraform-provision.outputs.ecs_cluster }}"
+          echo "Serviço: ${{ needs.terraform-provision.outputs.ecs_service }}"
           aws ecs update-service \
             --cluster ${{ needs.terraform-provision.outputs.ecs_cluster }} \
             --service ${{ needs.terraform-provision.outputs.ecs_service }} \
