@@ -11,10 +11,6 @@ provider "aws" {
   region = var.aws_region
 }
 
-lifecycle {
-  prevent_destroy = true
-}
-
 # Repositório ECR
 resource "aws_ecr_repository" "app" {
   name                 = var.project_name
