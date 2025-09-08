@@ -171,3 +171,32 @@ jobs:
             --cluster ${{ needs.terraform-provision.outputs.ecs_cluster }} \
             --service ${{ needs.terraform-provision.outputs.ecs_service }} \
             --force-new-deployment
+
+  rollback:
+    name: Rollback da infraestrutura
+    if: failure()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v4
+
+      - name: Configurar credenciais AWS
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+          aws-region: us-east-1
+
+      - name: Instalar Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.9.5
+
+      - name: Inicializar Terraform
+        working-directory: infra/terraform
+        run: terraform init -input=false
+
+      - name: Executar rollback com destroy
+        working-directory: infra/terraform
+        run: terraform destroy -auto-approve
