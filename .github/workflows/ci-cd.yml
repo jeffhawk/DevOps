@@ -163,7 +163,7 @@ jobs:
   # 4 - Deploy no ECS
   ecs-deploy:
     name: Deploy no ECS
-    needs: docker-build-push
+    needs: [terraform-provision, docker-build-push]
     runs-on: ubuntu-latest
     steps:
       - name: Configurar credenciais AWS
@@ -174,11 +174,14 @@ jobs:
           aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
           aws-region: us-east-1
 
+      - name: Verificar variáveis recebidas
+        run: |
+          echo "ECR: ${{ needs.terraform-provision.outputs.ecr_repo }}"
+          echo "Cluster: ${{ needs.terraform-provision.outputs.ecs_cluster }}"
+          echo "Service: ${{ needs.terraform-provision.outputs.ecs_service }}"
+
       - name: Atualizar ECS Service
         run: |
-          echo "Verificando as variáveis de output"
-          echo "Cluster: ${{ needs.terraform-provision.outputs.ecs_cluster }}"
-          echo "Serviço: ${{ needs.terraform-provision.outputs.ecs_service }}"
           aws ecs update-service \
             --cluster ${{ needs.terraform-provision.outputs.ecs_cluster }} \
             --service ${{ needs.terraform-provision.outputs.ecs_service }} \
