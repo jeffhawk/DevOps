@@ -94,25 +94,50 @@ jobs:
         working-directory: infra/terraform
         run: terraform apply -auto-approve
 
+      - name: Upload do state
+        uses: actions/upload-artifact@v4
+        with:
+          name: terraform-state
+          path: infra/terraform/terraform.tfstate
+
       - name: Capturar outputs do Terraform
         id: tf_outputs
         working-directory: infra/terraform
         run: |
-          ecr_repo=$(terraform output ecr_repository_url 2>/dev/null | grep -Eo '^[^ ]+$' | grep -v bucket_name | grep -v '0\.' | grep -v '^0$' | tr -d '\n\r')
-          ecs_cluster=$(terraform output ecs_cluster_name 2>/dev/null | grep -Eo '^[^ ]+$' | grep -v bucket_name | grep -v '0\.' | grep -v '^0$' | tr -d '\n\r')
-          ecs_service=$(terraform output ecs_service_name 2>/dev/null | grep -Eo '^[^ ]+$' | grep -v bucket_name | grep -v '0\.' | grep -v '^0$' | tr -d '\n\r')
+          # ecr_repo=$(terraform output ecr_repository_url 2>/dev/null | grep -Eo '^[^ ]+$' | grep -v bucket_name | grep -v '0\.' | grep -v '^0$' | tr -d '\n\r')
+          # ecs_cluster=$(terraform output ecs_cluster_name 2>/dev/null | grep -Eo '^[^ ]+$' | grep -v bucket_name | grep -v '0\.' | grep -v '^0$' | tr -d '\n\r')
+          # ecs_service=$(terraform output ecs_service_name 2>/dev/null | grep -Eo '^[^ ]+$' | grep -v bucket_name | grep -v '0\.' | grep -v '^0$' | tr -d '\n\r')
 
-          ecr_repo=$(echo $ecr_repo | sed 's/^"//; s/"$//' | xargs)
-          ecs_cluster=$(echo $ecs_cluster | sed 's/^"//; s/"$//' | xargs)
-          ecs_service=$(echo $ecs_service | sed 's/^"//; s/"$//' | xargs)
+          # ecr_repo=$(echo $ecr_repo | sed 's/^"//; s/"$//' | xargs)
+          # ecs_cluster=$(echo $ecs_cluster | sed 's/^"//; s/"$//' | xargs)
+          # ecs_service=$(echo $ecs_service | sed 's/^"//; s/"$//' | xargs)
 
-          echo "ECR Repository URL: $ecr_repo"
-          echo "ECS Cluster Name: $ecs_cluster"
-          echo "ECS Service Name: $ecs_service"
+          # echo "ECR Repository URL: $ecr_repo"
+          # echo "ECS Cluster Name: $ecs_cluster"
+          # echo "ECS Service Name: $ecs_service"
+          {
+            echo "ecr_repo<<EOF"
+            terraform output -raw ecr_repository_url
+            echo "EOF"
+
+            echo "ecs_cluster<<EOF"
+            terraform output -raw ecs_cluster_name
+            echo "EOF"
+
+            echo "ecs_service<<EOF"
+            terraform output -raw ecs_service_name
+            echo "EOF"
+          } >> $GITHUB_OUTPUT
 
           echo "ecr_repo=$ecr_repo" >> $GITHUB_OUTPUT
           echo "ecs_cluster=$ecs_cluster" >> $GITHUB_OUTPUT
           echo "ecs_service=$ecs_service" >> $GITHUB_OUTPUT
+
+      - name: Verificar variáveis capturadas
+        run: |
+          echo "ECR: ${{ steps.tf_outputs.outputs.ecr_repo }}"
+          echo "Cluster: ${{ steps.tf_outputs.outputs.ecs_cluster }}"
+          echo "Service: ${{ steps.tf_outputs.outputs.ecs_service }}"
 
   # 3 - Build e push da imagem Docker para o ECR
   docker-build-push:
@@ -197,6 +222,12 @@ jobs:
       - name: Inicializar Terraform
         working-directory: infra/terraform
         run: terraform init -input=false
+
+      - name: Baixar o state
+        uses: actions/download-artifact@v4
+        with:
+          name: terraform-state
+          path: infra/terraform/
 
       - name: Executar rollback com destroy
         working-directory: infra/terraform
