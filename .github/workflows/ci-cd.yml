@@ -133,7 +133,7 @@ jobs:
           echo "ecs_cluster=$ecs_cluster" >> $GITHUB_OUTPUT
           echo "ecs_service=$ecs_service" >> $GITHUB_OUTPUT
 
-      - name: Verificar variáveis capturadas
+      - name: Verificar variáveis capturadas 1
         run: |
           echo "ECR: ${{ steps.tf_outputs.outputs.ecr_repo }}"
           echo "Cluster: ${{ steps.tf_outputs.outputs.ecs_cluster }}"
