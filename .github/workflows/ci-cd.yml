@@ -115,19 +115,18 @@ jobs:
           # echo "ECR Repository URL: $ecr_repo"
           # echo "ECS Cluster Name: $ecs_cluster"
           # echo "ECS Service Name: $ecs_service"
-          {
-            echo "ecr_repo<<EOF"
-            terraform output -raw ecr_repository_url
-            echo "EOF"
+          echo "ecr_repo<<EOF" >> $GITHUB_OUTPUT
+          terraform output -raw ecr_repository_url >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
 
-            echo "ecs_cluster<<EOF"
-            terraform output -raw ecs_cluster_name
-            echo "EOF"
+          echo "ecs_cluster<<EOF" >> $GITHUB_OUTPUT
+          terraform output -raw ecs_cluster_name >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
 
-            echo "ecs_service<<EOF"
-            terraform output -raw ecs_service_name
-            echo "EOF"
-          } >> $GITHUB_OUTPUT
+          echo "ecs_service<<EOF" >> $GITHUB_OUTPUT
+          terraform output -raw ecs_service_name >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
 
           echo "ecr_repo=$ecr_repo" >> $GITHUB_OUTPUT
           echo "ecs_cluster=$ecs_cluster" >> $GITHUB_OUTPUT
