@@ -104,29 +104,17 @@ jobs:
         id: tf_outputs
         working-directory: infra/terraform
         run: |
-          # ecr_repo=$(terraform output ecr_repository_url 2>/dev/null | grep -Eo '^[^ ]+$' | grep -v bucket_name | grep -v '0\.' | grep -v '^0$' | tr -d '\n\r')
-          # ecs_cluster=$(terraform output ecs_cluster_name 2>/dev/null | grep -Eo '^[^ ]+$' | grep -v bucket_name | grep -v '0\.' | grep -v '^0$' | tr -d '\n\r')
-          # ecs_service=$(terraform output ecs_service_name 2>/dev/null | grep -Eo '^[^ ]+$' | grep -v bucket_name | grep -v '0\.' | grep -v '^0$' | tr -d '\n\r')
+          ecr_repo=$(terraform output ecr_repository_url 2>/dev/null | grep -Eo '^[^ ]+$' | grep -v bucket_name | grep -v '0\.' | grep -v '^0$' | tr -d '\n\r')
+          ecs_cluster=$(terraform output ecs_cluster_name 2>/dev/null | grep -Eo '^[^ ]+$' | grep -v bucket_name | grep -v '0\.' | grep -v '^0$' | tr -d '\n\r')
+          ecs_service=$(terraform output ecs_service_name 2>/dev/null | grep -Eo '^[^ ]+$' | grep -v bucket_name | grep -v '0\.' | grep -v '^0$' | tr -d '\n\r')
 
-          # ecr_repo=$(echo $ecr_repo | sed 's/^"//; s/"$//' | xargs)
-          # ecs_cluster=$(echo $ecs_cluster | sed 's/^"//; s/"$//' | xargs)
-          # ecs_service=$(echo $ecs_service | sed 's/^"//; s/"$//' | xargs)
+          ecr_repo=$(echo $ecr_repo | sed 's/^"//; s/"$//' | xargs)
+          ecs_cluster=$(echo $ecs_cluster | sed 's/^"//; s/"$//' | xargs)
+          ecs_service=$(echo $ecs_service | sed 's/^"//; s/"$//' | xargs)
 
-          # echo "ECR Repository URL: $ecr_repo"
-          # echo "ECS Cluster Name: $ecs_cluster"
-          # echo "ECS Service Name: $ecs_service"
-          echo "ecr_repo<<EOF" >> $GITHUB_OUTPUT
-          terraform output -raw ecr_repository_url >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
-
-          echo "ecs_cluster<<EOF" >> $GITHUB_OUTPUT
-          terraform output -raw ecs_cluster_name >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
-
-          echo "ecs_service<<EOF" >> $GITHUB_OUTPUT
-          terraform output -raw ecs_service_name >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
-
+          echo "ECR Repository URL: $ecr_repo"
+          echo "ECS Cluster Name: $ecs_cluster"
+          echo "ECS Service Name: $ecs_service"
 
           echo "ecr_repo=$ecr_repo" >> $GITHUB_OUTPUT
           echo "ecs_cluster=$ecs_cluster" >> $GITHUB_OUTPUT
