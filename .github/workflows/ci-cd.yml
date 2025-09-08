@@ -175,6 +175,7 @@ jobs:
   rollback:
     name: Rollback da infraestrutura
     if: failure()
+    needs: [build-static, terraform-provision, docker-build-push, ecs-deploy]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout do código
